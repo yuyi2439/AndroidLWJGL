@@ -1,0 +1,14 @@
+[
+  {
+    "file": "shaderc/third_party/CMakeLists.txt",
+    "before": "set(GLSLANG_ENABLE_INSTALL $<NOT:${SKIP_GLSLANG_INSTALL}>)",
+    "after": "set(GLSLANG_ENABLE_INSTALL OFF)",
+    "reason": "glslang tests this at configure time; a generator expression is truthy even when skip-install is enabled. Install only our runtime targets."
+  },
+  {
+    "file": "lwjgl/modules/lwjgl/core/src/main/c/linux/liburing/include/liburing/compat.h",
+    "before": "struct __kernel_timespec {\n\tint64_t\t\ttv_sec;\n\tlong long\ttv_nsec;\n};",
+    "after": "#include <linux/time_types.h>",
+    "reason": "Android NDK provides __kernel_timespec; do not redefine it in LWJGL's desktop Linux compatibility header."
+  }
+]

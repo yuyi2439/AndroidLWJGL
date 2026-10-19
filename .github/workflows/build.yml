@@ -1,0 +1,65 @@
+name: Android LWJGL natives
+
+on:
+  push:
+    branches: [main]
+    tags: ['3.4.3-android.*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      NDK_VERSION: 30.0.16248370
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: android-actions/setup-android@v3
+      - name: Install toolchain
+        run: sdkmanager "ndk;$NDK_VERSION" "cmake;3.22.1"
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: sources-${{ runner.os }}-${{ hashFiles('sources.lock.json', 'patches.json') }}
+      - name: Build and audit arm64 libraries
+        run: python build.py --ndk "$ANDROID_HOME/ndk/$NDK_VERSION" --sdk "$ANDROID_HOME" --jobs 2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lwjgl-3.4.3-android-arm64
+          if-no-files-found: error
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+            dist/manifest.json
+      - name: Verify release tag version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python -c "import json,os; v=json.load(open('sources.lock.json'))['lwjgl_version']; assert os.environ['RELEASE_TAG'].startswith(v+'-android.'), 'Tag must match locked LWJGL version'"
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: lwjgl-3.4.3-android-arm64
+          path: release
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" release/* --verify-tag --title "$RELEASE_TAG" --generate-notes
