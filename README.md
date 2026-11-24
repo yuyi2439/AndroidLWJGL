@@ -34,17 +34,17 @@ OpenAL / SPIRV-Cross 保留上游 Android/CMake 的库名，消费方需要配�
 ## 本地构建
 
 需要 Python **3.12+**、CMake **3.22.1+**、Ninja、Android NDK。
-本项目的 CI 工具链固定为 NDK **30.0.16248370**、CMake **3.22.1**。
+本项目的 CI 工具链固定为 NDK **28.2.13676358**、CMake **3.22.1**。
 首次构建需要联网下载源码；不需要 Ant、Gradle、Kotlin、Autotools 或宿主 JDK。
 
 ```sh
-python build.py --ndk /path/to/android-sdk/ndk/30.0.16248370 --sdk /path/to/android-sdk
+python build.py --ndk /path/to/android-sdk/ndk/28.2.13676358 --sdk /path/to/android-sdk
 ```
 
 Windows PowerShell（Python 可执行文件也可以写成完整路径）：
 
 ```powershell
-python build.py --ndk "$env:LOCALAPPDATA/Android/Sdk/ndk/30.0.16248370" --sdk "$env:LOCALAPPDATA/Android/Sdk"
+python build.py --ndk "$env:LOCALAPPDATA/Android/Sdk/ndk/28.2.13676358" --sdk "$env:LOCALAPPDATA/Android/Sdk"
 ```
 
 也可以设置 `ANDROID_NDK_HOME` 和 `ANDROID_HOME`，然后直接运行 `python build.py`。
